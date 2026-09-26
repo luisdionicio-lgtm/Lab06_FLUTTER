@@ -94,7 +94,7 @@ class _EventCardState extends State<EventCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFF252A41),
+                            color: Color(0xFF443C91),
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.15,
@@ -129,7 +129,7 @@ class _EventCardState extends State<EventCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Color(0xFF8C8FA2),
+                      color: Color(0xFF686E82),
                       fontSize: 11.5,
                     ),
                   ),

@@ -12,13 +12,13 @@ void main() {
 
     await tester.pumpWidget(const MyApp());
 
-    expect(find.text('Septiembre 2026'), findsNWidgets(2));
+    expect(find.text('Septiembre 2026'), findsOneWidget);
     expect(find.text('Presentación de proyecto'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('next_month')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Octubre 2026'), findsNWidgets(2));
+    expect(find.text('Octubre 2026'), findsOneWidget);
     expect(find.text('Un día sin pendientes'), findsOneWidget);
   });
 
@@ -68,11 +68,32 @@ void main() {
 
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
+    for (final day in [8, 13, 14]) {
+      expect(
+        find.byKey(ValueKey('holiday_marker_2026_9_$day')),
+        findsOneWidget,
+      );
+    }
     await tester.tap(find.byKey(const ValueKey('day_2026_9_8')));
     await tester.pumpAndSettle();
 
     expect(find.text('FERIADO'), findsOneWidget);
     expect(find.text('Nuestra Señora de Cocharcas · Regional'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('all events button opens the dated event list', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(const MyApp());
+    final allEventsButton = find.byKey(const Key('all_events_button'));
+    await tester.ensureVisible(allEventsButton);
+    await tester.tap(allEventsButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Todos los eventos'), findsOneWidget);
+    expect(find.text('Reunión de equipo'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

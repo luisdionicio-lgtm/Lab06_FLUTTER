@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../widgets/bottom_navigation.dart';
+import '../widgets/calendar_grid.dart';
+import '../widgets/calendar_header.dart';
 import '../widgets/calendar_widget.dart';
 import '../widgets/event_card.dart';
 
@@ -120,11 +123,6 @@ class _CalendarPageState extends State<CalendarPage> {
       result.putIfAbsent(day, () => []).add(event.color);
     }
     return result;
-  }
-
-  String get _monthTitle {
-    final month = _months[_focusedMonth.month - 1];
-    return '${month[0].toUpperCase()}${month.substring(1)} ${_focusedMonth.year}';
   }
 
   String get _selectedDateLabel =>
@@ -386,14 +384,96 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
+  Future<void> _showAllEventsDialog() {
+    final events = List<CalendarEvent>.of(_events)
+      ..sort((first, second) => first.date.compareTo(second.date));
+
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: const Color(0xFFFCFBFE),
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text(
+          'Todos los eventos',
+          style: TextStyle(
+            color: Color(0xFF443C91),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: SizedBox(
+          width: 420,
+          height: math.min(420.0, MediaQuery.sizeOf(dialogContext).height * 0.55),
+          child: events.isEmpty
+              ? const Center(child: Text('Aún no hay eventos programados.'))
+              : ListView.separated(
+                  itemCount: events.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final event = events[index];
+                    final month = _months[event.date.month - 1]
+                        .substring(0, 3)
+                        .toUpperCase();
+                    return Material(
+                      color: const Color(0xFFF5F3FA),
+                      borderRadius: BorderRadius.circular(16),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: event.color.withValues(alpha: 0.14),
+                          child: Icon(event.icon, color: event.color, size: 20),
+                        ),
+                        title: Text(
+                          event.title,
+                          style: const TextStyle(
+                            color: Color(0xFF443C91),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${event.date.day} $month ${event.date.year} · ${event.time}',
+                          style: const TextStyle(color: Color(0xFF59647D)),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: event.color,
+                          size: 15,
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _selectedDate = event.date;
+                            _focusedMonth = DateTime(
+                              event.date.year,
+                              event.date.month,
+                            );
+                          });
+                          Navigator.pop(dialogContext);
+                        },
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final showDevice = constraints.maxWidth >= 700;
+          final showDevice = constraints.maxWidth >= 900;
           final height = showDevice
-              ? math.min(900.0, constraints.maxHeight - 36)
+              ? math.min(860.0, constraints.maxHeight * 0.94)
               : constraints.maxHeight;
           return Stack(
             children: [
@@ -418,17 +498,97 @@ class _CalendarPageState extends State<CalendarPage> {
                                 onToday: _goToToday,
                                 onAdd: _showAddEventDialog,
                               ),
-                              const SizedBox(height: 18),
-                              _HeroHeader(
-                                monthTitle: _monthTitle,
+                              const SizedBox(height: 12),
+                              CalendarHeader(
+                                dayLabel: _selectedDateLabel,
                                 eventCount: _monthEvents.length,
                               ),
-                              const SizedBox(height: 18),
-                              _buildCalendar(),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 12),
+                              CalendarGrid(
+                                focusedMonth: _focusedMonth,
+                                selectedDate: _selectedDate,
+                                eventColors: _eventColors,
+                                holidayLabels: _holidays,
+                                onDateSelected: (date) {
+                                  setState(() {
+                                    _selectedDate = date;
+                                    if (date.month != _focusedMonth.month ||
+                                        date.year != _focusedMonth.year) {
+                                      _focusedMonth = DateTime(date.year, date.month);
+                                    }
+                                  });
+                                },
+                                onPreviousMonth: () => _changeMonth(-1),
+                                onNextMonth: () => _changeMonth(1),
+                              ),
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 7,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.97),
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.95),
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x160B1025),
+                                      blurRadius: 16,
+                                      offset: Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.event_note_rounded,
+                                      color: Color(0xFF5948C7),
+                                      size: 19,
+                                    ),
+                                    const SizedBox(width: 9),
+                                    const Expanded(
+                                      child: Text(
+                                        'Eventos destacados',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Color(0xFF343A56),
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    TextButton.icon(
+                                      key: const Key('all_events_button'),
+                                      onPressed: _showAllEventsDialog,
+                                      icon: const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 16,
+                                      ),
+                                      label: const Text('Ver todos'),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: const Color(0xFF5142B8),
+                                        backgroundColor: const Color(0xFFEDEAFF),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 8,
+                                        ),
+                                        visualDensity: VisualDensity.compact,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
                               _buildAgenda(),
-                              const SizedBox(height: 18),
-                              const _PhoneBottomNav(),
+                              const SizedBox(height: 10),
+                              const BottomNavigation(),
                             ],
                           ),
                         ),
@@ -472,9 +632,9 @@ class _CalendarPageState extends State<CalendarPage> {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
+        color: Colors.white.withValues(alpha: 0.97),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.98)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x140F1535),
@@ -538,7 +698,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     const Text(
                       'Agenda del día',
                       style: TextStyle(
-                        color: Color(0xFF1D2340),
+                        color: Color(0xFF4B438D),
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                       ),
@@ -548,7 +708,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           ? 'Todo despejado por ahora'
                           : 'Tus momentos importantes',
                       style: const TextStyle(
-                        color: Color(0xFF8589A3),
+                        color: Color(0xFF626B84),
                         fontSize: 13,
                       ),
                     ),
@@ -723,66 +883,54 @@ class _PhoneShell extends StatelessWidget {
           ),
         ],
         Container(
-          width: showDeviceFrame ? 430 : double.infinity,
+          width: showDeviceFrame ? 390 : double.infinity,
           height: height,
-          padding: EdgeInsets.all(showDeviceFrame ? 9 : 0),
+          padding: EdgeInsets.all(showDeviceFrame ? 8 : 0),
           decoration: BoxDecoration(
             gradient: showDeviceFrame
                 ? const LinearGradient(
                     colors: [
-                      Color(0xFF4B4759),
+                      Color(0xFF4D4A5A),
                       Color(0xFF171620),
-                      Color(0xFF07070B),
+                      Color(0xFF090A10),
                     ],
-                    stops: [0, 0.38, 1],
+                    stops: [0, 0.42, 1],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
                 : null,
-            borderRadius: BorderRadius.circular(showDeviceFrame ? 50 : 0),
+            borderRadius: BorderRadius.circular(showDeviceFrame ? 42 : 0),
             border: showDeviceFrame
-                ? Border.all(color: const Color(0xFF716C7E), width: 1)
+                ? Border.all(color: const Color(0xFF595462), width: 0.8)
                 : null,
             boxShadow: showDeviceFrame
                 ? const [
                     BoxShadow(
-                      color: Color(0x5718102F),
-                      blurRadius: 64,
-                      spreadRadius: 6,
-                      offset: Offset(0, 34),
+                      color: Color(0x4D121826),
+                      blurRadius: 42,
+                      spreadRadius: 2,
+                      offset: Offset(0, 24),
                     ),
                     BoxShadow(
-                      color: Color(0x307A5CFF),
-                      blurRadius: 100,
-                      spreadRadius: 16,
-                      offset: Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: Color(0x66000000),
-                      blurRadius: 5,
-                      offset: Offset(7, 10),
+                      color: Color(0x24475EFF),
+                      blurRadius: 80,
+                      spreadRadius: 8,
+                      offset: Offset(0, 0),
                     ),
                   ]
                 : null,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(showDeviceFrame ? 40 : 0),
+            borderRadius: BorderRadius.circular(showDeviceFrame ? 34 : 0),
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xFFF8F6FD),
-                          Color(0xFFF0EDF8),
-                          Color(0xFFF8F5F8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: child,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CustomPaint(painter: _FireWaterBackdropPainter()),
+                      child,
+                    ],
                   ),
                 ),
                 if (showDeviceFrame)
@@ -881,9 +1029,13 @@ class _PhoneStatusBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 42,
-      child: Stack(
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.82),
+      ),
+      child: SizedBox(
+        height: 42,
+        child: Stack(
         alignment: Alignment.center,
         children: [
           Padding(
@@ -894,7 +1046,7 @@ class _PhoneStatusBar extends StatelessWidget {
                 const Text(
                   '9:41',
                   style: TextStyle(
-                    color: Color(0xFF24283E),
+                    color: Color(0xFF4D438F),
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),
@@ -904,13 +1056,13 @@ class _PhoneStatusBar extends StatelessWidget {
                     const Icon(
                       Icons.signal_cellular_alt_rounded,
                       size: 14,
-                      color: Color(0xFF24283E),
+                      color: Color(0xFF4D438F),
                     ),
                     const SizedBox(width: 4),
                     const Icon(
                       Icons.wifi_rounded,
                       size: 14,
-                      color: Color(0xFF24283E),
+                      color: Color(0xFF4D438F),
                     ),
                     const SizedBox(width: 4),
                     Container(
@@ -918,7 +1070,7 @@ class _PhoneStatusBar extends StatelessWidget {
                       height: 9,
                       padding: const EdgeInsets.all(1.5),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF24283E)),
+                        border: Border.all(color: const Color(0xFF4D438F)),
                         borderRadius: BorderRadius.circular(3),
                       ),
                       child: Align(
@@ -926,7 +1078,7 @@ class _PhoneStatusBar extends StatelessWidget {
                         child: Container(
                           width: 12,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF24283E),
+                            color: const Color(0xFF4D438F),
                             borderRadius: BorderRadius.circular(1),
                           ),
                         ),
@@ -960,6 +1112,7 @@ class _PhoneStatusBar extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -1055,8 +1208,22 @@ class _TopBar extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 520;
-        return Row(
-          children: [
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.94),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x180B1025),
+                blurRadius: 16,
+                offset: Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
             Container(
               width: 46,
               height: 46,
@@ -1085,7 +1252,7 @@ class _TopBar extends StatelessWidget {
                   Text(
                     'LÚMINA',
                     style: TextStyle(
-                      color: Color(0xFF20253E),
+                      color: Color(0xFF4A3CB1),
                       fontSize: 17,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 2.2,
@@ -1093,7 +1260,7 @@ class _TopBar extends StatelessWidget {
                   ),
                   Text(
                     'Tu tiempo, en armonía',
-                    style: TextStyle(color: Color(0xFF8B8FA5), fontSize: 12),
+                    style: TextStyle(color: Color(0xFF687088), fontSize: 12),
                   ),
                 ],
               ),
@@ -1152,7 +1319,8 @@ class _TopBar extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -1394,7 +1562,7 @@ class _EmptyAgenda extends StatelessWidget {
           const Text(
             'Un día sin pendientes',
             style: TextStyle(
-              color: Color(0xFF42475E),
+              color: Color(0xFF4B438D),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1402,7 +1570,7 @@ class _EmptyAgenda extends StatelessWidget {
           const Text(
             'Disfruta el espacio libre o planifica algo nuevo.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Color(0xFF9295A6), fontSize: 12),
+            style: TextStyle(color: Color(0xFF667087), fontSize: 12),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -1429,35 +1597,214 @@ class _AmbientBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFF8F6FC), Color(0xFFF0EDF8), Color(0xFFF8F5F5)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ColoredBox(color: Color(0xFF030407)),
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(-0.78, 0.1),
+                radius: 0.9,
+                colors: [Color(0x553A8EAE), Color(0x0003070B)],
+              ),
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -120,
-              right: -70,
-              child: _orb(const Color(0x337E63E8), 300),
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0.82, 0.15),
+                radius: 0.92,
+                colors: [Color(0x55E64D18), Color(0x0003070B)],
+              ),
             ),
-            Positioned(
-              bottom: -100,
-              left: -80,
-              child: _orb(const Color(0x26EE87A7), 280),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  static Widget _orb(Color color, double size) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-  );
+class _FireWaterBackdropPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bounds = Offset.zero & size;
+    final scale = size.shortestSide;
+    canvas.drawRect(bounds, Paint()..color = const Color(0xFF030407));
+
+    void glow(Offset point, double radius, List<Color> colors) {
+      canvas.drawCircle(
+        point,
+        radius,
+        Paint()
+          ..shader = RadialGradient(colors: colors).createShader(
+            Rect.fromCircle(center: point, radius: radius),
+          )
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius * 0.18),
+      );
+    }
+
+    final waterCenter = Offset(size.width * 0.31, size.height * 0.52);
+    final fireCenter = Offset(size.width * 0.69, size.height * 0.53);
+    glow(
+      waterCenter,
+      scale * 0.72,
+      const [Color(0xA8255D8A), Color(0x482D465F), Color(0x0003070B)],
+    );
+    glow(
+      fireCenter,
+      scale * 0.76,
+      const [Color(0xA8F06413), Color(0x633A0C12), Color(0x0003070B)],
+    );
+
+    final waterBody = Path()
+      ..moveTo(size.width * 0.43, size.height * 0.30)
+      ..cubicTo(size.width * 0.24, size.height * 0.21, size.width * 0.03, size.height * 0.27, size.width * 0.00, size.height * 0.43)
+      ..cubicTo(size.width * 0.12, size.height * 0.40, size.width * 0.25, size.height * 0.48, size.width * 0.45, size.height * 0.49)
+      ..cubicTo(size.width * 0.31, size.height * 0.60, size.width * 0.15, size.height * 0.67, size.width * 0.00, size.height * 0.69)
+      ..cubicTo(size.width * 0.19, size.height * 0.78, size.width * 0.40, size.height * 0.67, size.width * 0.51, size.height * 0.56)
+      ..cubicTo(size.width * 0.45, size.height * 0.46, size.width * 0.53, size.height * 0.39, size.width * 0.43, size.height * 0.30)
+      ..close();
+    canvas.drawPath(
+      waterBody,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFB8F4FF), Color(0xFF337FA8), Color(0xFF071A30)],
+          stops: [0.0, 0.42, 1.0],
+        ).createShader(bounds)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, scale * 0.025),
+    );
+
+    final fireBody = Path()
+      ..moveTo(size.width * 0.54, size.height * 0.49)
+      ..cubicTo(size.width * 0.60, size.height * 0.37, size.width * 0.51, size.height * 0.27, size.width * 0.65, size.height * 0.18)
+      ..cubicTo(size.width * 0.64, size.height * 0.31, size.width * 0.79, size.height * 0.28, size.width * 0.78, size.height * 0.10)
+      ..cubicTo(size.width * 0.91, size.height * 0.26, size.width * 0.82, size.height * 0.35, size.width * 0.99, size.height * 0.42)
+      ..cubicTo(size.width * 0.88, size.height * 0.52, size.width * 0.98, size.height * 0.59, size.width * 0.82, size.height * 0.76)
+      ..cubicTo(size.width * 0.76, size.height * 0.84, size.width * 0.61, size.height * 0.76, size.width * 0.54, size.height * 0.62)
+      ..cubicTo(size.width * 0.50, size.height * 0.57, size.width * 0.51, size.height * 0.53, size.width * 0.54, size.height * 0.49)
+      ..close();
+    canvas.drawPath(
+      fireBody,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFFE2A1), Color(0xFFFF871D), Color(0xFFE32612), Color(0xFF641019)],
+          stops: [0.0, 0.34, 0.68, 1.0],
+        ).createShader(bounds)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, scale * 0.02),
+    );
+
+    final innerFlame = Path()
+      ..moveTo(size.width * 0.59, size.height * 0.60)
+      ..cubicTo(size.width * 0.61, size.height * 0.47, size.width * 0.71, size.height * 0.46, size.width * 0.70, size.height * 0.33)
+      ..cubicTo(size.width * 0.80, size.height * 0.45, size.width * 0.77, size.height * 0.54, size.width * 0.86, size.height * 0.58)
+      ..cubicTo(size.width * 0.79, size.height * 0.70, size.width * 0.67, size.height * 0.72, size.width * 0.59, size.height * 0.60)
+      ..close();
+    canvas.drawPath(
+      innerFlame,
+      Paint()
+        ..shader = const RadialGradient(
+          colors: [Color(0xFFFFF5C5), Color(0xFFFFB12F), Color(0x00FF5A12)],
+          stops: [0.0, 0.46, 1.0],
+        ).createShader(Rect.fromCenter(center: fireCenter, width: scale * 0.56, height: scale * 0.72)),
+    );
+
+    final waterRibbons = <Path>[
+      Path()
+        ..moveTo(size.width * 0.00, size.height * 0.35)
+        ..cubicTo(size.width * 0.18, size.height * 0.27, size.width * 0.32, size.height * 0.46, size.width * 0.53, size.height * 0.43),
+      Path()
+        ..moveTo(size.width * 0.00, size.height * 0.72)
+        ..cubicTo(size.width * 0.17, size.height * 0.77, size.width * 0.34, size.height * 0.55, size.width * 0.52, size.height * 0.57),
+      Path()
+        ..moveTo(size.width * 0.02, size.height * 0.50)
+        ..cubicTo(size.width * 0.16, size.height * 0.45, size.width * 0.20, size.height * 0.63, size.width * 0.40, size.height * 0.68),
+    ];
+    for (var index = 0; index < waterRibbons.length; index++) {
+      canvas.drawPath(
+        waterRibbons[index],
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = scale * (index == 0 ? 0.027 : 0.014)
+          ..shader = const LinearGradient(
+            colors: [Color(0x00FFFFFF), Color(0xFFF3FCFF), Color(0xFF82DDF5), Color(0x00A7E9FF)],
+          ).createShader(bounds)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, scale * 0.008),
+      );
+    }
+
+    final splashPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = scale * 0.004
+      ..color = const Color(0xAAE9FBFF);
+    for (var index = 0; index < 9; index++) {
+      final startX = size.width * (0.03 + (index % 3) * 0.11);
+      final startY = size.height * (0.32 + index * 0.045);
+      final path = Path()
+        ..moveTo(startX, startY)
+        ..quadraticBezierTo(
+          size.width * 0.20,
+          startY - size.height * 0.13,
+          size.width * (0.34 + (index % 2) * 0.08),
+          startY + size.height * 0.05,
+        );
+      canvas.drawPath(path, splashPaint);
+    }
+
+    final randomBubbles = <Offset>[
+      const Offset(0.05, 0.18), const Offset(0.13, 0.23), const Offset(0.20, 0.15),
+      const Offset(0.31, 0.25), const Offset(0.42, 0.31), const Offset(0.08, 0.57),
+      const Offset(0.17, 0.65), const Offset(0.28, 0.75), const Offset(0.40, 0.70),
+      const Offset(0.48, 0.62), const Offset(0.57, 0.25), const Offset(0.89, 0.21),
+      const Offset(0.96, 0.33), const Offset(0.93, 0.71), const Offset(0.74, 0.83),
+      const Offset(0.58, 0.79), const Offset(0.06, 0.82), const Offset(0.36, 0.87),
+    ];
+    for (var index = 0; index < randomBubbles.length; index++) {
+      final bubble = randomBubbles[index];
+      final radius = scale * (0.004 + (index % 4) * 0.002);
+      final position = Offset(size.width * bubble.dx, size.height * bubble.dy);
+      canvas.drawCircle(
+        position,
+        radius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = scale * 0.002
+          ..color = index.isEven ? const Color(0xDDF7FCFF) : const Color(0xCCFFD4A0),
+      );
+      canvas.drawCircle(
+        position.translate(-radius * 0.32, -radius * 0.38),
+        radius * 0.18,
+        Paint()..color = Colors.white.withValues(alpha: 0.9),
+      );
+    }
+
+    final sparks = Paint()..strokeCap = StrokeCap.round;
+    for (var index = 0; index < 54; index++) {
+      final x = size.width * (0.47 + (index * 37 % 51) / 100);
+      final y = size.height * (0.17 + (index * 61 % 68) / 100);
+      final radius = scale * (0.0015 + (index % 4) * 0.001);
+      sparks.color = index.isEven
+          ? const Color(0xCCFFCB69)
+          : const Color(0x99FF5825);
+      canvas.drawCircle(Offset(x, y), radius, sparks);
+    }
+
+    final vignette = Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center,
+        radius: 0.88,
+        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.78)],
+        stops: const [0.48, 1.0],
+      ).createShader(bounds);
+    canvas.drawRect(bounds, vignette);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
