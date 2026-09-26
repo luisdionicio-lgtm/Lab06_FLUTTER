@@ -6,6 +6,7 @@ class CalendarWidget extends StatelessWidget {
     required this.focusedMonth,
     required this.selectedDate,
     required this.eventColors,
+    required this.holidayLabels,
     required this.onDateSelected,
     required this.onPreviousMonth,
     required this.onNextMonth,
@@ -15,6 +16,7 @@ class CalendarWidget extends StatelessWidget {
   final DateTime focusedMonth;
   final DateTime selectedDate;
   final Map<DateTime, List<Color>> eventColors;
+  final Map<DateTime, String> holidayLabels;
   final ValueChanged<DateTime> onDateSelected;
   final VoidCallback onPreviousMonth;
   final VoidCallback onNextMonth;
@@ -53,6 +55,13 @@ class CalendarWidget extends StatelessWidget {
       if (_sameDay(entry.key, date)) return entry.value;
     }
     return const [];
+  }
+
+  String? _holidayFor(DateTime date) {
+    for (final entry in holidayLabels.entries) {
+      if (_sameDay(entry.key, date)) return entry.value;
+    }
+    return null;
   }
 
   List<DateTime> _visibleDays() {
@@ -192,39 +201,59 @@ class CalendarWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 7),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: visibleDays.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  mainAxisSpacing: spacious ? 6 : 3,
-                  crossAxisSpacing: spacious ? 6 : 3,
-                  childAspectRatio: spacious ? 1.12 : 0.98,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 360),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(
+                      begin: 0.975,
+                      end: 1,
+                    ).animate(animation),
+                    child: child,
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  final date = visibleDays[index];
-                  return _DayCell(
-                    key: ValueKey('day_${date.year}_${date.month}_${date.day}'),
-                    date: date,
-                    isInMonth: date.month == focusedMonth.month,
-                    isSelected: _sameDay(date, selectedDate),
-                    isToday: _sameDay(date, DateTime.now()),
-                    isWeekend: date.weekday >= DateTime.saturday,
-                    eventColors: _colorsFor(date),
-                    onTap: () => onDateSelected(date),
-                  );
-                },
+                child: GridView.builder(
+                  key: ValueKey('${focusedMonth.year}-${focusedMonth.month}'),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: visibleDays.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisSpacing: spacious ? 6 : 3,
+                    crossAxisSpacing: spacious ? 6 : 3,
+                    childAspectRatio: spacious ? 1.12 : 0.98,
+                  ),
+                  itemBuilder: (context, index) {
+                    final date = visibleDays[index];
+                    return _DayCell(
+                      key: ValueKey(
+                        'day_${date.year}_${date.month}_${date.day}',
+                      ),
+                      date: date,
+                      isInMonth: date.month == focusedMonth.month,
+                      isSelected: _sameDay(date, selectedDate),
+                      isToday: _sameDay(date, DateTime.now()),
+                      isWeekend: date.weekday >= DateTime.saturday,
+                      eventColors: _colorsFor(date),
+                      holidayName: _holidayFor(date),
+                      onTap: () => onDateSelected(date),
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 10),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              const Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 10,
+                runSpacing: 5,
                 children: [
                   _LegendDot(color: Color(0xFF5B7CFA), label: 'Trabajo'),
-                  SizedBox(width: 16),
                   _LegendDot(color: Color(0xFFF15B92), label: 'Estudio'),
-                  SizedBox(width: 16),
                   _LegendDot(color: Color(0xFF22A978), label: 'Personal'),
+                  _LegendDot(color: Color(0xFFE63C51), label: 'Feriado'),
                 ],
               ),
             ],
@@ -273,6 +302,7 @@ class _DayCell extends StatefulWidget {
     required this.isToday,
     required this.isWeekend,
     required this.eventColors,
+    required this.holidayName,
     required this.onTap,
   });
 
@@ -282,6 +312,7 @@ class _DayCell extends StatefulWidget {
   final bool isToday;
   final bool isWeekend;
   final List<Color> eventColors;
+  final String? holidayName;
   final VoidCallback onTap;
 
   @override
@@ -294,10 +325,15 @@ class _DayCellState extends State<_DayCell> {
   @override
   Widget build(BuildContext context) {
     final label = '${widget.date.day}/${widget.date.month}/${widget.date.year}';
+    final isHoliday = widget.holidayName != null;
     return Semantics(
       button: true,
       selected: widget.isSelected,
-      label: widget.eventColors.isEmpty ? label : '$label, con evento',
+      label: isHoliday
+          ? '$label, feriado: ${widget.holidayName}'
+          : widget.eventColors.isEmpty
+          ? label
+          : '$label, con evento',
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
@@ -311,8 +347,10 @@ class _DayCellState extends State<_DayCell> {
               transform: Matrix4.translationValues(0, _hovered ? -1 : 0, 0),
               decoration: BoxDecoration(
                 gradient: widget.isSelected
-                    ? const LinearGradient(
-                        colors: [Color(0xFF5E52D8), Color(0xFF9566D7)],
+                    ? LinearGradient(
+                        colors: isHoliday
+                            ? const [Color(0xFFE3384E), Color(0xFFFF6676)]
+                            : const [Color(0xFF5E52D8), Color(0xFF9566D7)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       )
@@ -321,13 +359,17 @@ class _DayCellState extends State<_DayCell> {
                     ? null
                     : widget.isToday
                     ? const Color(0xFFF0ECFF)
+                    : isHoliday
+                    ? const Color(0xFFFFF1F3)
                     : _hovered
                     ? const Color(0xFFF5F2FC)
                     : widget.isWeekend && widget.isInMonth
                     ? const Color(0xFFFCF9FC)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(15),
-                border: widget.isToday && !widget.isSelected
+                border: !widget.isSelected && isHoliday
+                    ? Border.all(color: const Color(0xFFFFCCD2))
+                    : widget.isToday && !widget.isSelected
                     ? Border.all(color: const Color(0xFFAFA2EF), width: 1.2)
                     : null,
                 boxShadow: widget.isSelected
@@ -350,6 +392,8 @@ class _DayCellState extends State<_DayCell> {
                           ? Colors.white
                           : !widget.isInMonth
                           ? const Color(0xFFC9CAD2)
+                          : isHoliday
+                          ? const Color(0xFFE2384E)
                           : widget.isWeekend
                           ? const Color(0xFF825E8E)
                           : const Color(0xFF33384F),
@@ -365,6 +409,20 @@ class _DayCellState extends State<_DayCell> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        if (isHoliday) ...[
+                          Container(
+                            width: 9,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: widget.isSelected
+                                  ? Colors.white
+                                  : const Color(0xFFE63C51),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          if (widget.eventColors.isNotEmpty)
+                            const SizedBox(width: 3),
+                        ],
                         for (final color in widget.eventColors.take(3)) ...[
                           Container(
                             width: 5,

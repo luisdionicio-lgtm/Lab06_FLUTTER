@@ -70,6 +70,28 @@ class _CalendarPageState extends State<CalendarPage> {
     ),
   ];
 
+  final Map<DateTime, String> _holidays = {
+    DateTime(2026, 1, 1): 'Año Nuevo',
+    DateTime(2026, 4, 2): 'Jueves Santo',
+    DateTime(2026, 4, 3): 'Viernes Santo',
+    DateTime(2026, 5, 1): 'Día del Trabajo',
+    DateTime(2026, 6, 7): 'Batalla de Arica y Día de la Bandera',
+    DateTime(2026, 6, 29): 'San Pedro y San Pablo',
+    DateTime(2026, 7, 23): 'Día de la Fuerza Aérea del Perú',
+    DateTime(2026, 7, 28): 'Fiestas Patrias',
+    DateTime(2026, 7, 29): 'Fiestas Patrias',
+    DateTime(2026, 8, 6): 'Batalla de Junín',
+    DateTime(2026, 8, 30): 'Santa Rosa de Lima',
+    DateTime(2026, 9, 8): 'Nuestra Señora de Cocharcas · Regional',
+    DateTime(2026, 9, 13): 'Creación del departamento de Junín · Regional',
+    DateTime(2026, 9, 14): 'Señor de Locumba · Regional',
+    DateTime(2026, 10, 8): 'Combate de Angamos',
+    DateTime(2026, 11, 1): 'Día de Todos los Santos',
+    DateTime(2026, 12, 8): 'Inmaculada Concepción',
+    DateTime(2026, 12, 9): 'Batalla de Ayacucho',
+    DateTime(2026, 12, 25): 'Navidad',
+  };
+
   bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
@@ -83,6 +105,13 @@ class _CalendarPageState extends State<CalendarPage> {
 
   List<CalendarEvent> get _selectedEvents =>
       _events.where((event) => _sameDay(event.date, _selectedDate)).toList();
+
+  String? get _selectedHoliday {
+    for (final entry in _holidays.entries) {
+      if (_sameDay(entry.key, _selectedDate)) return entry.value;
+    }
+    return null;
+  }
 
   Map<DateTime, List<Color>> get _eventColors {
     final result = <DateTime, List<Color>>{};
@@ -378,6 +407,9 @@ class _CalendarPageState extends State<CalendarPage> {
                       const _PhoneStatusBar(),
                       Expanded(
                         child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
+                          ),
                           padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,6 +448,7 @@ class _CalendarPageState extends State<CalendarPage> {
     focusedMonth: _focusedMonth,
     selectedDate: _selectedDate,
     eventColors: _eventColors,
+    holidayLabels: _holidays,
     onDateSelected: (date) {
       setState(() {
         _selectedDate = date;
@@ -432,6 +465,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Widget _buildAgenda() {
     final events = _selectedEvents;
+    final holiday = _selectedHoliday;
     final monthShort = _months[_selectedDate.month - 1]
         .substring(0, 3)
         .toUpperCase();
@@ -541,6 +575,70 @@ class _CalendarPageState extends State<CalendarPage> {
               ),
             ],
           ),
+          if (holiday != null) ...[
+            const SizedBox(height: 18),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFF1F2), Color(0xFFFFE5E8)],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFFFC4CB)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x18E53950),
+                    blurRadius: 14,
+                    offset: Offset(0, 7),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 39,
+                    height: 39,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE63C51),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.flag_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'FERIADO',
+                          style: TextStyle(
+                            color: Color(0xFFE2384E),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.25,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          holiday,
+                          style: const TextStyle(
+                            color: Color(0xFF792B37),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 22),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 260),
@@ -604,57 +702,175 @@ class _PhoneShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: showDeviceFrame ? 430 : double.infinity,
-      height: height,
-      margin: EdgeInsets.all(showDeviceFrame ? 18 : 0),
-      padding: EdgeInsets.all(showDeviceFrame ? 9 : 0),
-      decoration: BoxDecoration(
-        gradient: showDeviceFrame
-            ? const LinearGradient(
-                colors: [Color(0xFF252333), Color(0xFF08080D)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
-        borderRadius: BorderRadius.circular(showDeviceFrame ? 50 : 0),
-        border: showDeviceFrame
-            ? Border.all(color: const Color(0xFF4B475B), width: 1.2)
-            : null,
-        boxShadow: showDeviceFrame
-            ? const [
-                BoxShadow(
-                  color: Color(0x4D18102F),
-                  blurRadius: 60,
-                  spreadRadius: 5,
-                  offset: Offset(0, 30),
+    final phone = Stack(
+      clipBehavior: Clip.none,
+      children: [
+        if (showDeviceFrame) ...[
+          const Positioned(
+            left: -4,
+            top: 155,
+            child: _SideButton(width: 4, height: 68),
+          ),
+          const Positioned(
+            left: -4,
+            top: 240,
+            child: _SideButton(width: 4, height: 42),
+          ),
+          const Positioned(
+            right: -4,
+            top: 205,
+            child: _SideButton(width: 4, height: 86),
+          ),
+        ],
+        Container(
+          width: showDeviceFrame ? 430 : double.infinity,
+          height: height,
+          padding: EdgeInsets.all(showDeviceFrame ? 9 : 0),
+          decoration: BoxDecoration(
+            gradient: showDeviceFrame
+                ? const LinearGradient(
+                    colors: [
+                      Color(0xFF4B4759),
+                      Color(0xFF171620),
+                      Color(0xFF07070B),
+                    ],
+                    stops: [0, 0.38, 1],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(showDeviceFrame ? 50 : 0),
+            border: showDeviceFrame
+                ? Border.all(color: const Color(0xFF716C7E), width: 1)
+                : null,
+            boxShadow: showDeviceFrame
+                ? const [
+                    BoxShadow(
+                      color: Color(0x5718102F),
+                      blurRadius: 64,
+                      spreadRadius: 6,
+                      offset: Offset(0, 34),
+                    ),
+                    BoxShadow(
+                      color: Color(0x307A5CFF),
+                      blurRadius: 100,
+                      spreadRadius: 16,
+                      offset: Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: Color(0x66000000),
+                      blurRadius: 5,
+                      offset: Offset(7, 10),
+                    ),
+                  ]
+                : null,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(showDeviceFrame ? 40 : 0),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFFF8F6FD),
+                          Color(0xFFF0EDF8),
+                          Color(0xFFF8F5F8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: child,
+                  ),
                 ),
-                BoxShadow(
-                  color: Color(0x267A5CFF),
-                  blurRadius: 90,
-                  spreadRadius: 12,
-                  offset: Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: Color(0x40000000),
-                  blurRadius: 4,
-                  offset: Offset(5, 8),
-                ),
-              ]
-            : null,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(showDeviceFrame ? 40 : 0),
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFF8F6FD), Color(0xFFF0EDF8), Color(0xFFF8F5F8)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+                if (showDeviceFrame)
+                  Positioned(
+                    top: -120,
+                    right: -112,
+                    child: IgnorePointer(
+                      child: Transform.rotate(
+                        angle: -0.38,
+                        child: Container(
+                          width: 165,
+                          height: 520,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withValues(alpha: 0),
+                                Colors.white.withValues(alpha: 0.055),
+                                Colors.white.withValues(alpha: 0),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (showDeviceFrame)
+                  Positioned(
+                    bottom: 7,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        width: 112,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFF1E1D27,
+                          ).withValues(alpha: 0.78),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          child: child,
         ),
+      ],
+    );
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 720),
+      curve: Curves.easeOutBack,
+      child: phone,
+      builder: (context, value, child) => Transform.translate(
+        offset: Offset(0, 22 * (1 - value)),
+        child: Transform.scale(scale: 0.95 + (0.05 * value), child: child),
+      ),
+    );
+  }
+}
+
+class _SideButton extends StatelessWidget {
+  const _SideButton({required this.width, required this.height});
+
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF777181), Color(0xFF211F29)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x40000000),
+            blurRadius: 3,
+            offset: Offset(1, 2),
+          ),
+        ],
       ),
     );
   }
@@ -994,16 +1210,10 @@ class _HeroHeader extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
+            const Positioned(
               right: -19,
               bottom: -4,
-              child: Image.asset(
-                'assets/images/calendar_3d.png',
-                width: 162,
-                height: 162,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-              ),
+              child: _FloatingCalendarArt(),
             ),
             Positioned.fill(
               child: Padding(
@@ -1094,6 +1304,56 @@ class _HeroHeader extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FloatingCalendarArt extends StatefulWidget {
+  const _FloatingCalendarArt();
+
+  @override
+  State<_FloatingCalendarArt> createState() => _FloatingCalendarArtState();
+}
+
+class _FloatingCalendarArtState extends State<_FloatingCalendarArt>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _float;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+    _float = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _float,
+      child: Image.asset(
+        'assets/images/calendar_3d.png',
+        width: 162,
+        height: 162,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+      ),
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, 18 * (1 - _float.value)),
+        child: Transform.rotate(
+          angle: -0.08 * (1 - _float.value),
+          child: child,
         ),
       ),
     );

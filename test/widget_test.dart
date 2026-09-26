@@ -59,4 +59,20 @@ void main() {
     expect(find.text('Diseñar nueva experiencia'), findsOneWidget);
     expect(find.text('1 evento'), findsOneWidget);
   });
+
+  testWidgets('a holiday is highlighted and described in the agenda', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('day_2026_9_8')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('FERIADO'), findsOneWidget);
+    expect(find.text('Nuestra Señora de Cocharcas · Regional'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
