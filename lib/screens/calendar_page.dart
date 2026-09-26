@@ -171,166 +171,208 @@ class _CalendarPageState extends State<CalendarPage> {
             'Personal' => Icons.favorite_rounded,
             _ => Icons.work_rounded,
           };
-          return AlertDialog(
-            backgroundColor: const Color(0xFFFCFBFE),
-            surfaceTintColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-            title: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.11),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(icon, color: color, size: 21),
+          final dialogTheme =
+              ThemeData(
+                useMaterial3: true,
+                brightness: Brightness.light,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color(0xFF6750E8),
+                  brightness: Brightness.light,
                 ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Nuevo evento',
-                  style: TextStyle(fontWeight: FontWeight.w800),
+              ).copyWith(
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: const Color(0xFFF8F7FC),
+                  labelStyle: const TextStyle(color: Color(0xFF5D6277)),
+                  hintStyle: const TextStyle(color: Color(0xFF8B8FA1)),
+                  prefixIconColor: const Color(0xFF6750E8),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFD7D4E5)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF6750E8),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              );
+          return Theme(
+            data: dialogTheme,
+            child: AlertDialog(
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 24,
+              ),
+              backgroundColor: const Color(0xFFFCFBFE),
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.11),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(icon, color: color, size: 21),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Nuevo evento',
+                    style: TextStyle(
+                      color: Color(0xFF252045),
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: 420,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        key: const Key('event_title_field'),
+                        controller: titleController,
+                        autofocus: true,
+                        onChanged: (value) => setDialogState(
+                          () => hasTitle = value.trim().isNotEmpty,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Título',
+                          hintText: '¿Qué tienes planeado?',
+                          prefixIcon: Icon(Icons.edit_rounded),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: detailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Detalle (opcional)',
+                          prefixIcon: Icon(Icons.notes_rounded),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        initialValue: category,
+                        decoration: const InputDecoration(
+                          labelText: 'Categoría',
+                          prefixIcon: Icon(Icons.category_rounded),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Trabajo',
+                            child: Text('Trabajo'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Estudio',
+                            child: Text('Estudio'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Personal',
+                            child: Text('Personal'),
+                          ),
+                        ],
+                        onChanged: (value) =>
+                            setDialogState(() => category = value!),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                final picked = await showTimePicker(
+                                  context: context,
+                                  initialTime: time,
+                                );
+                                if (picked != null) {
+                                  setDialogState(() => time = picked);
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.schedule_rounded,
+                                size: 18,
+                              ),
+                              label: Text(_formatTime(time)),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(52),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              height: 52,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF2F0F8),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                _selectedDateLabel,
+                                style: const TextStyle(
+                                  color: Color(0xFF686C80),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actionsPadding: const EdgeInsets.fromLTRB(22, 4, 22, 20),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancelar'),
+                ),
+                FilledButton.icon(
+                  key: const Key('save_event_button'),
+                  onPressed: !hasTitle
+                      ? null
+                      : () => Navigator.pop(
+                          dialogContext,
+                          CalendarEvent(
+                            date: _selectedDate,
+                            title: titleController.text.trim(),
+                            description: detailController.text.trim().isEmpty
+                                ? 'Actividad personal'
+                                : detailController.text.trim(),
+                            time: _formatTime(time),
+                            category: category,
+                            icon: icon,
+                            color: color,
+                          ),
+                        ),
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Añadir'),
                 ),
               ],
             ),
-            content: SizedBox(
-              width: 420,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      key: const Key('event_title_field'),
-                      controller: titleController,
-                      autofocus: true,
-                      onChanged: (value) => setDialogState(
-                        () => hasTitle = value.trim().isNotEmpty,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Título',
-                        hintText: '¿Qué tienes planeado?',
-                        prefixIcon: Icon(Icons.edit_rounded),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: detailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Detalle (opcional)',
-                        prefixIcon: Icon(Icons.notes_rounded),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      initialValue: category,
-                      decoration: const InputDecoration(
-                        labelText: 'Categoría',
-                        prefixIcon: Icon(Icons.category_rounded),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
-                        ),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Trabajo',
-                          child: Text('Trabajo'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Estudio',
-                          child: Text('Estudio'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Personal',
-                          child: Text('Personal'),
-                        ),
-                      ],
-                      onChanged: (value) =>
-                          setDialogState(() => category = value!),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              final picked = await showTimePicker(
-                                context: context,
-                                initialTime: time,
-                              );
-                              if (picked != null) {
-                                setDialogState(() => time = picked);
-                              }
-                            },
-                            icon: const Icon(Icons.schedule_rounded, size: 18),
-                            label: Text(_formatTime(time)),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size.fromHeight(52),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Container(
-                            height: 52,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF2F0F8),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              _selectedDateLabel,
-                              style: const TextStyle(
-                                color: Color(0xFF686C80),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton.icon(
-                key: const Key('save_event_button'),
-                onPressed: !hasTitle
-                    ? null
-                    : () => Navigator.pop(
-                        dialogContext,
-                        CalendarEvent(
-                          date: _selectedDate,
-                          title: titleController.text.trim(),
-                          description: detailController.text.trim().isEmpty
-                              ? 'Actividad personal'
-                              : detailController.text.trim(),
-                          time: _formatTime(time),
-                          category: category,
-                          icon: icon,
-                          color: color,
-                        ),
-                      ),
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Añadir'),
-              ),
-            ],
           );
         },
       ),
@@ -1590,7 +1632,7 @@ class _EmptyAgenda extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: const Color(0xFFF7F6FB),
         borderRadius: BorderRadius.circular(22),
@@ -1599,8 +1641,8 @@ class _EmptyAgenda extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 54,
-            height: 54,
+            width: 42,
+            height: 42,
             decoration: const BoxDecoration(
               color: Color(0xFFEEEAFB),
               shape: BoxShape.circle,
@@ -1608,10 +1650,10 @@ class _EmptyAgenda extends StatelessWidget {
             child: const Icon(
               Icons.spa_outlined,
               color: Color(0xFF8878C5),
-              size: 27,
+              size: 22,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           const Text(
             'Un día sin pendientes',
             style: TextStyle(
@@ -1625,13 +1667,14 @@ class _EmptyAgenda extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(color: Color(0xFF667087), fontSize: 12),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: onAdd,
             icon: const Icon(Icons.add_rounded, size: 17),
             label: const Text('Crear un evento'),
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF6750E8),
+              minimumSize: const Size(178, 42),
               side: const BorderSide(color: Color(0xFFD7D0F4)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(13),
