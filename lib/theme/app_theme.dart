@@ -25,10 +25,7 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           color: AppColors.text,
         ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          color: AppColors.muted,
-        ),
+        bodyMedium: TextStyle(fontSize: 14, color: AppColors.muted),
       ),
     );
   }

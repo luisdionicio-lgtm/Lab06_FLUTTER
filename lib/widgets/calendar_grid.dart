@@ -64,9 +64,14 @@ class CalendarGrid extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 1.2),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x130B1025),
-            blurRadius: 34,
-            offset: Offset(0, 18),
+            color: Color(0x401F77FF),
+            blurRadius: 28,
+            offset: Offset(-8, 14),
+          ),
+          BoxShadow(
+            color: Color(0x33F950C7),
+            blurRadius: 27,
+            offset: Offset(8, 14),
           ),
         ],
       ),
@@ -83,21 +88,29 @@ class CalendarGrid extends StatelessWidget {
                 child: Column(
                   children: [
                     const Text(
-                      'Vista del mes',
+                      'V I S T A   D E L   M E S',
                       style: TextStyle(
                         color: Color(0xFF747A8E),
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
+                        letterSpacing: 0.7,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '${_monthName(focusedMonth.month)} ${focusedMonth.year}',
-                      style: const TextStyle(
-                        color: Color(0xFF4B438D),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          color: Color(0xFF20264A),
+                          fontSize: 19,
+                          fontWeight: FontWeight.w900,
+                        ),
+                        children: [
+                          TextSpan(text: '${_monthName(focusedMonth.month)} '),
+                          TextSpan(
+                            text: '${focusedMonth.year}',
+                            style: const TextStyle(color: Color(0xFF5A30EE)),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -158,23 +171,32 @@ class CalendarGrid extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: isSelectedCore
                       ? BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFF6F5AE8),
-                              Color(0xFF8D64F6),
-                              Color(0xFFB771FF),
-                            ],
+                          gradient: LinearGradient(
+                            colors: holiday != null
+                                ? const [Color(0xFFE83E59), Color(0xFFFF6580)]
+                                : const [
+                                    Color(0xFF245CFF),
+                                    Color(0xFF6B35F5),
+                                    Color(0xFFFF53D0),
+                                  ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: const [
                             BoxShadow(
-                              color: Color(0x336255D8),
+                              color: Color(0x8A5E3BFF),
                               blurRadius: 18,
-                              offset: Offset(0, 8),
+                              spreadRadius: 1,
+                              offset: Offset(0, 5),
                             ),
                           ],
+                        )
+                      : holiday != null && isCurrentMonth
+                      ? BoxDecoration(
+                          color: const Color(0xFFFFEDF0),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFFFA9B5)),
                         )
                       : null,
                   child: Stack(
@@ -189,6 +211,8 @@ class CalendarGrid extends StatelessWidget {
                                 ? Colors.white
                                 : isOutside
                                 ? const Color(0xFF858B9D)
+                                : holiday != null
+                                ? const Color(0xFFE63852)
                                 : const Color(0xFF36416B),
                             fontSize: 13,
                             fontWeight: isSelectedCore
@@ -286,6 +310,14 @@ class _ArrowButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFF2F1F8),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE1DEFA)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x245D4FE8),
+            blurRadius: 11,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
       child: IconButton(
         onPressed: onPressed,

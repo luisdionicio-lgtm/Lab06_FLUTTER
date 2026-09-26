@@ -14,8 +14,9 @@ Aplicación de calendario desarrollada en Flutter con una interfaz móvil premiu
 - Eliminación de eventos con opción para deshacer.
 - Selector de fecha, estados hover y animaciones suaves.
 - Diseño adaptable con presentación de smartphone en Flutter Web.
-- Mockup realista con marco metálico, botones laterales, reflejo y animaciones de entrada.
-- Ilustración 3D local, sin depender de recursos remotos.
+- Mockup realista con marco metálico, isla dinámica, botones laterales, reflejos y animaciones de entrada.
+- Identidad visual neón/cósmica inspirada en el mockup de referencia, con navegación inferior fija.
+- Fondo cósmico e ilustración 3D locales, sin depender de recursos remotos.
 
 ## Tecnologías utilizadas
 
@@ -33,14 +34,22 @@ El proyecto no necesita paquetes externos adicionales en tiempo de ejecución.
 lib/
 ├── main.dart
 ├── screens/
-│   └── calendar_page.dart
+│   ├── calendar_page.dart
+│   └── calendar_screen.dart
+├── theme/
+│   ├── app_colors.dart
+│   └── app_theme.dart
 └── widgets/
+    ├── bottom_navigation.dart
+    ├── calendar_grid.dart
+    ├── calendar_header.dart
     ├── calendar_widget.dart
     └── event_card.dart
 
 assets/
 └── images/
-    └── calendar_3d.png
+    ├── calendar_3d.png
+    └── cosmic_background.png
 ```
 
 ## Ejecución
@@ -58,4 +67,4 @@ flutter test
 flutter build web --release
 ```
 
-Las pruebas cubren navegación mensual, selección de eventos en formato móvil y creación de nuevos eventos.
+Las pruebas cubren navegación mensual, selección de eventos en formato móvil, creación de nuevos eventos, feriados y listado completo de eventos.

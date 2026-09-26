@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../widgets/bottom_navigation.dart';
 import '../widgets/calendar_grid.dart';
 import '../widgets/calendar_header.dart';
-import '../widgets/calendar_widget.dart';
 import '../widgets/event_card.dart';
 
 class CalendarPage extends StatefulWidget {
@@ -149,24 +148,6 @@ class _CalendarPageState extends State<CalendarPage> {
       _focusedMonth = DateTime(today.year, today.month);
       _selectedDate = DateTime(today.year, today.month, today.day);
     });
-  }
-
-  Future<void> _showMonthPicker() async {
-    final selected = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2035, 12, 31),
-      helpText: 'ELIGE UNA FECHA',
-      cancelText: 'CANCELAR',
-      confirmText: 'IR A LA FECHA',
-    );
-    if (selected != null && mounted) {
-      setState(() {
-        _selectedDate = selected;
-        _focusedMonth = DateTime(selected.year, selected.month);
-      });
-    }
   }
 
   Future<void> _showAddEventDialog() async {
@@ -403,7 +384,10 @@ class _CalendarPageState extends State<CalendarPage> {
         ),
         content: SizedBox(
           width: 420,
-          height: math.min(420.0, MediaQuery.sizeOf(dialogContext).height * 0.55),
+          height: math.min(
+            420.0,
+            MediaQuery.sizeOf(dialogContext).height * 0.55,
+          ),
           child: events.isEmpty
               ? const Center(child: Text('Aún no hay eventos programados.'))
               : ListView.separated(
@@ -490,7 +474,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           physics: const BouncingScrollPhysics(
                             parent: AlwaysScrollableScrollPhysics(),
                           ),
-                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -514,7 +498,10 @@ class _CalendarPageState extends State<CalendarPage> {
                                     _selectedDate = date;
                                     if (date.month != _focusedMonth.month ||
                                         date.year != _focusedMonth.year) {
-                                      _focusedMonth = DateTime(date.year, date.month);
+                                      _focusedMonth = DateTime(
+                                        date.year,
+                                        date.month,
+                                      );
                                     }
                                   });
                                 },
@@ -528,16 +515,28 @@ class _CalendarPageState extends State<CalendarPage> {
                                   vertical: 7,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.97),
-                                  borderRadius: BorderRadius.circular(18),
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xE6224F9D),
+                                      Color(0xE631245E),
+                                    ],
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.95),
+                                    color: const Color(0x806FA5FF),
                                   ),
                                   boxShadow: const [
                                     BoxShadow(
-                                      color: Color(0x160B1025),
-                                      blurRadius: 16,
-                                      offset: Offset(0, 6),
+                                      color: Color(0x55256FFF),
+                                      blurRadius: 20,
+                                      offset: Offset(-5, 7),
+                                    ),
+                                    BoxShadow(
+                                      color: Color(0x44FF4EC7),
+                                      blurRadius: 18,
+                                      offset: Offset(6, 7),
                                     ),
                                   ],
                                 ),
@@ -545,19 +544,34 @@ class _CalendarPageState extends State<CalendarPage> {
                                   children: [
                                     const Icon(
                                       Icons.event_note_rounded,
-                                      color: Color(0xFF5948C7),
+                                      color: Colors.white,
                                       size: 19,
                                     ),
                                     const SizedBox(width: 9),
                                     const Expanded(
-                                      child: Text(
-                                        'Eventos destacados',
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Color(0xFF343A56),
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w800,
-                                        ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Eventos destacados',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          SizedBox(height: 2),
+                                          Text(
+                                            'Revisa tus próximos eventos',
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: Color(0xFFC9D5FF),
+                                              fontSize: 9.5,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                     const SizedBox(width: 6),
@@ -570,15 +584,22 @@ class _CalendarPageState extends State<CalendarPage> {
                                       ),
                                       label: const Text('Ver todos'),
                                       style: TextButton.styleFrom(
-                                        foregroundColor: const Color(0xFF5142B8),
-                                        backgroundColor: const Color(0xFFEDEAFF),
+                                        foregroundColor: Colors.white,
+                                        backgroundColor: const Color(
+                                          0x405F62FF,
+                                        ),
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 10,
                                           vertical: 8,
                                         ),
                                         visualDensity: VisualDensity.compact,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          side: const BorderSide(
+                                            color: Color(0x99C8C5FF),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -587,11 +608,13 @@ class _CalendarPageState extends State<CalendarPage> {
                               ),
                               const SizedBox(height: 8),
                               _buildAgenda(),
-                              const SizedBox(height: 10),
-                              const BottomNavigation(),
                             ],
                           ),
                         ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 4, 16, 18),
+                        child: BottomNavigation(),
                       ),
                     ],
                   ),
@@ -603,25 +626,6 @@ class _CalendarPageState extends State<CalendarPage> {
       ),
     );
   }
-
-  Widget _buildCalendar() => CalendarWidget(
-    focusedMonth: _focusedMonth,
-    selectedDate: _selectedDate,
-    eventColors: _eventColors,
-    holidayLabels: _holidays,
-    onDateSelected: (date) {
-      setState(() {
-        _selectedDate = date;
-        if (date.month != _focusedMonth.month ||
-            date.year != _focusedMonth.year) {
-          _focusedMonth = DateTime(date.year, date.month);
-        }
-      });
-    },
-    onPreviousMonth: () => _changeMonth(-1),
-    onNextMonth: () => _changeMonth(1),
-    onMonthTitleTap: _showMonthPicker,
-  );
 
   Widget _buildAgenda() {
     final events = _selectedEvents;
@@ -901,7 +905,7 @@ class _PhoneShell extends StatelessWidget {
                 : null,
             borderRadius: BorderRadius.circular(showDeviceFrame ? 42 : 0),
             border: showDeviceFrame
-                ? Border.all(color: const Color(0xFF595462), width: 0.8)
+                ? Border.all(color: const Color(0xFF9B7CFF), width: 1.3)
                 : null,
             boxShadow: showDeviceFrame
                 ? const [
@@ -912,10 +916,16 @@ class _PhoneShell extends StatelessWidget {
                       offset: Offset(0, 24),
                     ),
                     BoxShadow(
-                      color: Color(0x24475EFF),
-                      blurRadius: 80,
-                      spreadRadius: 8,
+                      color: Color(0x55475EFF),
+                      blurRadius: 86,
+                      spreadRadius: 10,
                       offset: Offset(0, 0),
+                    ),
+                    BoxShadow(
+                      color: Color(0x4DFF4FCC),
+                      blurRadius: 35,
+                      spreadRadius: 1,
+                      offset: Offset(8, 3),
                     ),
                   ]
                 : null,
@@ -928,7 +938,27 @@ class _PhoneShell extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      CustomPaint(painter: _FireWaterBackdropPainter()),
+                      Image.asset(
+                        'assets/images/cosmic_background.png',
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        color: const Color(0xB80A0D22),
+                        colorBlendMode: BlendMode.darken,
+                        filterQuality: FilterQuality.medium,
+                      ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xA8080B20),
+                              Color(0xD90A0D24),
+                              Color(0xF20A0B20),
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
                       child,
                     ],
                   ),
@@ -1030,94 +1060,94 @@ class _PhoneStatusBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.82),
-      ),
+      decoration: BoxDecoration(color: const Color(0xCC0A0F2A)),
       child: SizedBox(
         height: 42,
         child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 21),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  '9:41',
-                  style: TextStyle(
-                    color: Color(0xFF4D438F),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+          alignment: Alignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 21),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '9:41',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.signal_cellular_alt_rounded,
-                      size: 14,
-                      color: Color(0xFF4D438F),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.wifi_rounded,
-                      size: 14,
-                      color: Color(0xFF4D438F),
-                    ),
-                    const SizedBox(width: 4),
-                    Container(
-                      width: 19,
-                      height: 9,
-                      padding: const EdgeInsets.all(1.5),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF4D438F)),
-                        borderRadius: BorderRadius.circular(3),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.signal_cellular_alt_rounded,
+                        size: 14,
+                        color: Colors.white,
                       ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          width: 12,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF4D438F),
-                            borderRadius: BorderRadius.circular(1),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.wifi_rounded,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 19,
+                        height: 9,
+                        padding: const EdgeInsets.all(1.5),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            width: 12,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(1),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 92,
-            height: 24,
-            decoration: BoxDecoration(
-              color: const Color(0xFF121218),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: const [
-                BoxShadow(color: Color(0x26000000), blurRadius: 8),
-              ],
-            ),
-            child: Align(
-              alignment: const Alignment(0.68, 0),
-              child: Container(
-                width: 7,
-                height: 7,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF25243A),
-                  shape: BoxShape.circle,
+            Container(
+              width: 92,
+              height: 24,
+              decoration: BoxDecoration(
+                color: const Color(0xFF121218),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x26000000), blurRadius: 8),
+                ],
+              ),
+              child: Align(
+                alignment: const Alignment(0.68, 0),
+                child: Container(
+                  width: 7,
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF25243A),
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
   }
 }
 
+// Legacy compact variant kept for small-screen experiments.
+// ignore: unused_element
 class _PhoneBottomNav extends StatelessWidget {
   const _PhoneBottomNav();
 
@@ -1211,114 +1241,135 @@ class _TopBar extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.94),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+            gradient: const LinearGradient(
+              colors: [Color(0xD91B2450), Color(0xD92B214C)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x180B1025),
-                blurRadius: 16,
-                offset: Offset(0, 6),
+                color: Color(0x4D126BFF),
+                blurRadius: 22,
+                offset: Offset(-6, 8),
+              ),
+              BoxShadow(
+                color: Color(0x33FF54D4),
+                blurRadius: 20,
+                offset: Offset(7, 7),
               ),
             ],
           ),
           child: Row(
             children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF7258F3), Color(0xFF9B62F0)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x406750E8),
-                    blurRadius: 18,
-                    offset: Offset(0, 7),
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF2F7DFF),
+                      Color(0xFF734CFF),
+                      Color(0xFFFF63CE),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Color(0x99FFFFFF)),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x995B54FF),
+                      blurRadius: 20,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.bolt_rounded, color: Colors.white),
               ),
-              child: const Icon(Icons.bolt_rounded, color: Colors.white),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'LÚMINA',
-                    style: TextStyle(
-                      color: Color(0xFF4A3CB1),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2.2,
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'LÚMINA',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2.2,
+                      ),
+                    ),
+                    Text(
+                      'Tu tiempo, en armonía',
+                      style: TextStyle(color: Color(0xFFC7D1FF), fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              if (!compact) ...[
+                TextButton.icon(
+                  key: const Key('today_button'),
+                  onPressed: onToday,
+                  icon: const Icon(Icons.near_me_rounded, size: 17),
+                  label: const Text('Hoy'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF5B49C9),
+                    backgroundColor: Colors.white.withValues(alpha: 0.78),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 13,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      side: const BorderSide(color: Color(0xFFE8E4F5)),
                     ),
                   ),
-                  Text(
-                    'Tu tiempo, en armonía',
-                    style: TextStyle(color: Color(0xFF687088), fontSize: 12),
+                ),
+                const SizedBox(width: 10),
+              ] else ...[
+                IconButton(
+                  key: const Key('today_button'),
+                  onPressed: onToday,
+                  tooltip: 'Ir a hoy',
+                  icon: const Icon(Icons.near_me_rounded, size: 18),
+                  color: Colors.white,
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.10),
+                    fixedSize: const Size(42, 42),
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
                   ),
-                ],
-              ),
-            ),
-            if (!compact) ...[
-              TextButton.icon(
-                key: const Key('today_button'),
-                onPressed: onToday,
-                icon: const Icon(Icons.near_me_rounded, size: 17),
-                label: const Text('Hoy'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF5B49C9),
-                  backgroundColor: Colors.white.withValues(alpha: 0.78),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 13,
-                  ),
+                ),
+                const SizedBox(width: 7),
+              ],
+              FilledButton.icon(
+                key: const Key('add_event_button'),
+                onPressed: onAdd,
+                icon: const Icon(Icons.add_rounded, size: 19),
+                label: compact
+                    ? const SizedBox.shrink()
+                    : const Text('Nuevo evento'),
+                style: FilledButton.styleFrom(
+                  minimumSize: compact ? const Size(46, 46) : null,
+                  padding: compact
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.symmetric(
+                          horizontal: 17,
+                          vertical: 13,
+                        ),
+                  backgroundColor: const Color(0xFF754CFF),
+                  foregroundColor: Colors.white,
+                  shadowColor: const Color(0xFFFF55D1),
+                  elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
-                    side: const BorderSide(color: Color(0xFFE8E4F5)),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-            ] else ...[
-              IconButton(
-                key: const Key('today_button'),
-                onPressed: onToday,
-                tooltip: 'Ir a hoy',
-                icon: const Icon(Icons.near_me_rounded, size: 18),
-                color: const Color(0xFF5B49C9),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.78),
-                  fixedSize: const Size(42, 42),
-                ),
-              ),
-              const SizedBox(width: 7),
-            ],
-            FilledButton.icon(
-              key: const Key('add_event_button'),
-              onPressed: onAdd,
-              icon: const Icon(Icons.add_rounded, size: 19),
-              label: compact
-                  ? const SizedBox.shrink()
-                  : const Text('Nuevo evento'),
-              style: FilledButton.styleFrom(
-                elevation: 0,
-                minimumSize: compact ? const Size(46, 46) : null,
-                padding: compact
-                    ? EdgeInsets.zero
-                    : const EdgeInsets.symmetric(horizontal: 17, vertical: 13),
-                backgroundColor: const Color(0xFF6251D2),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
             ],
           ),
         );
@@ -1327,6 +1378,8 @@ class _TopBar extends StatelessWidget {
   }
 }
 
+// Legacy illustrated header kept as a reusable visual fallback.
+// ignore: unused_element
 class _HeroHeader extends StatelessWidget {
   const _HeroHeader({required this.monthTitle, required this.eventCount});
 
@@ -1600,22 +1653,31 @@ class _AmbientBackground extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: Color(0xFF030407)),
-          DecoratedBox(
-            decoration: const BoxDecoration(
+          Image.asset(
+            'assets/images/cosmic_background.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            filterQuality: FilterQuality.high,
+          ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: Alignment(-0.78, 0.1),
-                radius: 0.9,
-                colors: [Color(0x553A8EAE), Color(0x0003070B)],
+                center: Alignment.center,
+                radius: 0.62,
+                colors: [Color(0x00000000), Color(0x8A02040D)],
               ),
             ),
           ),
-          DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment(0.82, 0.15),
-                radius: 0.92,
-                colors: [Color(0x55E64D18), Color(0x0003070B)],
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0x2606091B),
+                  Color(0x00000000),
+                  Color(0x4D03040E),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
           ),
@@ -1625,6 +1687,8 @@ class _AmbientBackground extends StatelessWidget {
   }
 }
 
+// Legacy procedural backdrop retained as an offline asset fallback.
+// ignore: unused_element
 class _FireWaterBackdropPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -1637,33 +1701,68 @@ class _FireWaterBackdropPainter extends CustomPainter {
         point,
         radius,
         Paint()
-          ..shader = RadialGradient(colors: colors).createShader(
-            Rect.fromCircle(center: point, radius: radius),
-          )
+          ..shader = RadialGradient(
+            colors: colors,
+          ).createShader(Rect.fromCircle(center: point, radius: radius))
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius * 0.18),
       );
     }
 
     final waterCenter = Offset(size.width * 0.31, size.height * 0.52);
     final fireCenter = Offset(size.width * 0.69, size.height * 0.53);
-    glow(
-      waterCenter,
-      scale * 0.72,
-      const [Color(0xA8255D8A), Color(0x482D465F), Color(0x0003070B)],
-    );
-    glow(
-      fireCenter,
-      scale * 0.76,
-      const [Color(0xA8F06413), Color(0x633A0C12), Color(0x0003070B)],
-    );
+    glow(waterCenter, scale * 0.72, const [
+      Color(0xA8255D8A),
+      Color(0x482D465F),
+      Color(0x0003070B),
+    ]);
+    glow(fireCenter, scale * 0.76, const [
+      Color(0xA8F06413),
+      Color(0x633A0C12),
+      Color(0x0003070B),
+    ]);
 
     final waterBody = Path()
       ..moveTo(size.width * 0.43, size.height * 0.30)
-      ..cubicTo(size.width * 0.24, size.height * 0.21, size.width * 0.03, size.height * 0.27, size.width * 0.00, size.height * 0.43)
-      ..cubicTo(size.width * 0.12, size.height * 0.40, size.width * 0.25, size.height * 0.48, size.width * 0.45, size.height * 0.49)
-      ..cubicTo(size.width * 0.31, size.height * 0.60, size.width * 0.15, size.height * 0.67, size.width * 0.00, size.height * 0.69)
-      ..cubicTo(size.width * 0.19, size.height * 0.78, size.width * 0.40, size.height * 0.67, size.width * 0.51, size.height * 0.56)
-      ..cubicTo(size.width * 0.45, size.height * 0.46, size.width * 0.53, size.height * 0.39, size.width * 0.43, size.height * 0.30)
+      ..cubicTo(
+        size.width * 0.24,
+        size.height * 0.21,
+        size.width * 0.03,
+        size.height * 0.27,
+        size.width * 0.00,
+        size.height * 0.43,
+      )
+      ..cubicTo(
+        size.width * 0.12,
+        size.height * 0.40,
+        size.width * 0.25,
+        size.height * 0.48,
+        size.width * 0.45,
+        size.height * 0.49,
+      )
+      ..cubicTo(
+        size.width * 0.31,
+        size.height * 0.60,
+        size.width * 0.15,
+        size.height * 0.67,
+        size.width * 0.00,
+        size.height * 0.69,
+      )
+      ..cubicTo(
+        size.width * 0.19,
+        size.height * 0.78,
+        size.width * 0.40,
+        size.height * 0.67,
+        size.width * 0.51,
+        size.height * 0.56,
+      )
+      ..cubicTo(
+        size.width * 0.45,
+        size.height * 0.46,
+        size.width * 0.53,
+        size.height * 0.39,
+        size.width * 0.43,
+        size.height * 0.30,
+      )
       ..close();
     canvas.drawPath(
       waterBody,
@@ -1679,12 +1778,54 @@ class _FireWaterBackdropPainter extends CustomPainter {
 
     final fireBody = Path()
       ..moveTo(size.width * 0.54, size.height * 0.49)
-      ..cubicTo(size.width * 0.60, size.height * 0.37, size.width * 0.51, size.height * 0.27, size.width * 0.65, size.height * 0.18)
-      ..cubicTo(size.width * 0.64, size.height * 0.31, size.width * 0.79, size.height * 0.28, size.width * 0.78, size.height * 0.10)
-      ..cubicTo(size.width * 0.91, size.height * 0.26, size.width * 0.82, size.height * 0.35, size.width * 0.99, size.height * 0.42)
-      ..cubicTo(size.width * 0.88, size.height * 0.52, size.width * 0.98, size.height * 0.59, size.width * 0.82, size.height * 0.76)
-      ..cubicTo(size.width * 0.76, size.height * 0.84, size.width * 0.61, size.height * 0.76, size.width * 0.54, size.height * 0.62)
-      ..cubicTo(size.width * 0.50, size.height * 0.57, size.width * 0.51, size.height * 0.53, size.width * 0.54, size.height * 0.49)
+      ..cubicTo(
+        size.width * 0.60,
+        size.height * 0.37,
+        size.width * 0.51,
+        size.height * 0.27,
+        size.width * 0.65,
+        size.height * 0.18,
+      )
+      ..cubicTo(
+        size.width * 0.64,
+        size.height * 0.31,
+        size.width * 0.79,
+        size.height * 0.28,
+        size.width * 0.78,
+        size.height * 0.10,
+      )
+      ..cubicTo(
+        size.width * 0.91,
+        size.height * 0.26,
+        size.width * 0.82,
+        size.height * 0.35,
+        size.width * 0.99,
+        size.height * 0.42,
+      )
+      ..cubicTo(
+        size.width * 0.88,
+        size.height * 0.52,
+        size.width * 0.98,
+        size.height * 0.59,
+        size.width * 0.82,
+        size.height * 0.76,
+      )
+      ..cubicTo(
+        size.width * 0.76,
+        size.height * 0.84,
+        size.width * 0.61,
+        size.height * 0.76,
+        size.width * 0.54,
+        size.height * 0.62,
+      )
+      ..cubicTo(
+        size.width * 0.50,
+        size.height * 0.57,
+        size.width * 0.51,
+        size.height * 0.53,
+        size.width * 0.54,
+        size.height * 0.49,
+      )
       ..close();
     canvas.drawPath(
       fireBody,
@@ -1692,7 +1833,12 @@ class _FireWaterBackdropPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFFFE2A1), Color(0xFFFF871D), Color(0xFFE32612), Color(0xFF641019)],
+          colors: [
+            Color(0xFFFFE2A1),
+            Color(0xFFFF871D),
+            Color(0xFFE32612),
+            Color(0xFF641019),
+          ],
           stops: [0.0, 0.34, 0.68, 1.0],
         ).createShader(bounds)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, scale * 0.02),
@@ -1700,29 +1846,78 @@ class _FireWaterBackdropPainter extends CustomPainter {
 
     final innerFlame = Path()
       ..moveTo(size.width * 0.59, size.height * 0.60)
-      ..cubicTo(size.width * 0.61, size.height * 0.47, size.width * 0.71, size.height * 0.46, size.width * 0.70, size.height * 0.33)
-      ..cubicTo(size.width * 0.80, size.height * 0.45, size.width * 0.77, size.height * 0.54, size.width * 0.86, size.height * 0.58)
-      ..cubicTo(size.width * 0.79, size.height * 0.70, size.width * 0.67, size.height * 0.72, size.width * 0.59, size.height * 0.60)
+      ..cubicTo(
+        size.width * 0.61,
+        size.height * 0.47,
+        size.width * 0.71,
+        size.height * 0.46,
+        size.width * 0.70,
+        size.height * 0.33,
+      )
+      ..cubicTo(
+        size.width * 0.80,
+        size.height * 0.45,
+        size.width * 0.77,
+        size.height * 0.54,
+        size.width * 0.86,
+        size.height * 0.58,
+      )
+      ..cubicTo(
+        size.width * 0.79,
+        size.height * 0.70,
+        size.width * 0.67,
+        size.height * 0.72,
+        size.width * 0.59,
+        size.height * 0.60,
+      )
       ..close();
     canvas.drawPath(
       innerFlame,
       Paint()
-        ..shader = const RadialGradient(
-          colors: [Color(0xFFFFF5C5), Color(0xFFFFB12F), Color(0x00FF5A12)],
-          stops: [0.0, 0.46, 1.0],
-        ).createShader(Rect.fromCenter(center: fireCenter, width: scale * 0.56, height: scale * 0.72)),
+        ..shader =
+            const RadialGradient(
+              colors: [Color(0xFFFFF5C5), Color(0xFFFFB12F), Color(0x00FF5A12)],
+              stops: [0.0, 0.46, 1.0],
+            ).createShader(
+              Rect.fromCenter(
+                center: fireCenter,
+                width: scale * 0.56,
+                height: scale * 0.72,
+              ),
+            ),
     );
 
     final waterRibbons = <Path>[
       Path()
         ..moveTo(size.width * 0.00, size.height * 0.35)
-        ..cubicTo(size.width * 0.18, size.height * 0.27, size.width * 0.32, size.height * 0.46, size.width * 0.53, size.height * 0.43),
+        ..cubicTo(
+          size.width * 0.18,
+          size.height * 0.27,
+          size.width * 0.32,
+          size.height * 0.46,
+          size.width * 0.53,
+          size.height * 0.43,
+        ),
       Path()
         ..moveTo(size.width * 0.00, size.height * 0.72)
-        ..cubicTo(size.width * 0.17, size.height * 0.77, size.width * 0.34, size.height * 0.55, size.width * 0.52, size.height * 0.57),
+        ..cubicTo(
+          size.width * 0.17,
+          size.height * 0.77,
+          size.width * 0.34,
+          size.height * 0.55,
+          size.width * 0.52,
+          size.height * 0.57,
+        ),
       Path()
         ..moveTo(size.width * 0.02, size.height * 0.50)
-        ..cubicTo(size.width * 0.16, size.height * 0.45, size.width * 0.20, size.height * 0.63, size.width * 0.40, size.height * 0.68),
+        ..cubicTo(
+          size.width * 0.16,
+          size.height * 0.45,
+          size.width * 0.20,
+          size.height * 0.63,
+          size.width * 0.40,
+          size.height * 0.68,
+        ),
     ];
     for (var index = 0; index < waterRibbons.length; index++) {
       canvas.drawPath(
@@ -1732,7 +1927,12 @@ class _FireWaterBackdropPainter extends CustomPainter {
           ..strokeCap = StrokeCap.round
           ..strokeWidth = scale * (index == 0 ? 0.027 : 0.014)
           ..shader = const LinearGradient(
-            colors: [Color(0x00FFFFFF), Color(0xFFF3FCFF), Color(0xFF82DDF5), Color(0x00A7E9FF)],
+            colors: [
+              Color(0x00FFFFFF),
+              Color(0xFFF3FCFF),
+              Color(0xFF82DDF5),
+              Color(0x00A7E9FF),
+            ],
           ).createShader(bounds)
           ..maskFilter = MaskFilter.blur(BlurStyle.normal, scale * 0.008),
       );
@@ -1758,12 +1958,24 @@ class _FireWaterBackdropPainter extends CustomPainter {
     }
 
     final randomBubbles = <Offset>[
-      const Offset(0.05, 0.18), const Offset(0.13, 0.23), const Offset(0.20, 0.15),
-      const Offset(0.31, 0.25), const Offset(0.42, 0.31), const Offset(0.08, 0.57),
-      const Offset(0.17, 0.65), const Offset(0.28, 0.75), const Offset(0.40, 0.70),
-      const Offset(0.48, 0.62), const Offset(0.57, 0.25), const Offset(0.89, 0.21),
-      const Offset(0.96, 0.33), const Offset(0.93, 0.71), const Offset(0.74, 0.83),
-      const Offset(0.58, 0.79), const Offset(0.06, 0.82), const Offset(0.36, 0.87),
+      const Offset(0.05, 0.18),
+      const Offset(0.13, 0.23),
+      const Offset(0.20, 0.15),
+      const Offset(0.31, 0.25),
+      const Offset(0.42, 0.31),
+      const Offset(0.08, 0.57),
+      const Offset(0.17, 0.65),
+      const Offset(0.28, 0.75),
+      const Offset(0.40, 0.70),
+      const Offset(0.48, 0.62),
+      const Offset(0.57, 0.25),
+      const Offset(0.89, 0.21),
+      const Offset(0.96, 0.33),
+      const Offset(0.93, 0.71),
+      const Offset(0.74, 0.83),
+      const Offset(0.58, 0.79),
+      const Offset(0.06, 0.82),
+      const Offset(0.36, 0.87),
     ];
     for (var index = 0; index < randomBubbles.length; index++) {
       final bubble = randomBubbles[index];
@@ -1775,7 +1987,9 @@ class _FireWaterBackdropPainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = scale * 0.002
-          ..color = index.isEven ? const Color(0xDDF7FCFF) : const Color(0xCCFFD4A0),
+          ..color = index.isEven
+              ? const Color(0xDDF7FCFF)
+              : const Color(0xCCFFD4A0),
       );
       canvas.drawCircle(
         position.translate(-radius * 0.32, -radius * 0.38),

@@ -17,21 +17,13 @@ class AppColors {
   static const Color shadow = Color(0x1A0B1025);
 
   static const LinearGradient premiumGradient = LinearGradient(
-    colors: [
-      Color(0xFF6A56FF),
-      Color(0xFF4DA8FF),
-      Color(0xFFFF5FB7),
-    ],
+    colors: [Color(0xFF6A56FF), Color(0xFF4DA8FF), Color(0xFFFF5FB7)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient selectedDayGradient = LinearGradient(
-    colors: [
-      Color(0xFF6E5BEF),
-      Color(0xFF8B5EF6),
-      Color(0xFFB86BFF),
-    ],
+    colors: [Color(0xFF6E5BEF), Color(0xFF8B5EF6), Color(0xFFB86BFF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

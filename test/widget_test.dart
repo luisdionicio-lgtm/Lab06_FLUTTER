@@ -12,13 +12,13 @@ void main() {
 
     await tester.pumpWidget(const MyApp());
 
-    expect(find.text('Septiembre 2026'), findsOneWidget);
+    expect(find.text('Septiembre 2026', findRichText: true), findsOneWidget);
     expect(find.text('Presentación de proyecto'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('next_month')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Octubre 2026'), findsOneWidget);
+    expect(find.text('Octubre 2026', findRichText: true), findsOneWidget);
     expect(find.text('Un día sin pendientes'), findsOneWidget);
   });
 
